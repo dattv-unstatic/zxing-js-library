@@ -36,7 +36,7 @@
   "bugs": "https://github.com/zxing-js/library/issues/new",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zxing-js/library"
+    "url": "https://github.com/dattv-unstatic/zxing-js-library"
   },
   "homepage": "https://zxing-js.github.io/library/",
   "private": false,
