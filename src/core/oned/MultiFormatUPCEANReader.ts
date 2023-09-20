@@ -40,10 +40,12 @@ export default class MultiFormatUPCEANReader extends OneDReader {
 
   public constructor(hints?: Map<DecodeHintType, any>) {
     super();
-    let possibleFormats = hints == null ? null : <BarcodeFormat[]>hints.get(DecodeHintType.POSSIBLE_FORMATS);
+    let possibleFormats =
+      hints == null
+        ? null
+        : <BarcodeFormat[]>hints.get(DecodeHintType.POSSIBLE_FORMATS);
     let readers: Collection<UPCEANReader> = [];
     if (possibleFormats != null) {
-
       if (possibleFormats.indexOf(BarcodeFormat.EAN_13) > -1) {
         readers.push(new EAN13Reader());
       }
@@ -71,7 +73,11 @@ export default class MultiFormatUPCEANReader extends OneDReader {
     this.readers = readers;
   }
 
-  public decodeRow(rowNumber: number, row: BitArray, hints?: Map<DecodeHintType, any>): Result {
+  public decodeRow(
+    rowNumber: number,
+    row: BitArray,
+    hints?: Map<DecodeHintType, any>
+  ): Result {
     for (let reader of this.readers) {
       try {
         // const result: Result = reader.decodeRow(rowNumber, row, startGuardPattern, hints);
@@ -93,8 +99,14 @@ export default class MultiFormatUPCEANReader extends OneDReader {
           result.getText().charAt(0) === '0';
         // @SuppressWarnings("unchecked")
         const possibleFormats: Collection<BarcodeFormat> =
-          hints == null ? null : hints.get(DecodeHintType.POSSIBLE_FORMATS) as Collection<BarcodeFormat>;
-        const canReturnUPCA: boolean = possibleFormats == null || possibleFormats.includes(BarcodeFormat.UPC_A);
+          hints == null
+            ? null
+            : (hints.get(
+                DecodeHintType.POSSIBLE_FORMATS
+              ) as Collection<BarcodeFormat>);
+        const canReturnUPCA: boolean =
+          possibleFormats == null ||
+          possibleFormats.includes(BarcodeFormat.UPC_A);
 
         if (ean13MayBeUPCA && canReturnUPCA) {
           const rawBytes = result.getRawBytes();
@@ -102,13 +114,36 @@ export default class MultiFormatUPCEANReader extends OneDReader {
           const resultUPCA: Result = new Result(
             result.getText().substring(1),
             rawBytes,
-            (rawBytes ? rawBytes.length : null),
+            rawBytes ? rawBytes.length : null,
             result.getResultPoints(),
             BarcodeFormat.UPC_A
           );
           resultUPCA.putAllMetadata(result.getResultMetadata());
           return resultUPCA;
         }
+
+        const ean8MayBeUPCE: boolean =
+          result.getBarcodeFormat() === BarcodeFormat.EAN_8 &&
+          result.getText().charAt(0) === '0';
+        // @SuppressWarnings("unchecked")
+        const canReturnUPCE: boolean =
+          possibleFormats == null ||
+          possibleFormats.includes(BarcodeFormat.UPC_E);
+
+        if (ean8MayBeUPCE && canReturnUPCE) {
+          const rawBytes = result.getRawBytes();
+          // Transfer the metadata across
+          const resultUPCE: Result = new Result(
+            result.getText().substring(1),
+            rawBytes,
+            rawBytes ? rawBytes.length : null,
+            result.getResultPoints(),
+            BarcodeFormat.UPC_E
+          );
+          resultUPCE.putAllMetadata(result.getResultMetadata());
+          return resultUPCE;
+        }
+
         return result;
       } catch (err) {
         // continue;
