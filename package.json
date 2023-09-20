@@ -1,5 +1,5 @@
 {
-  "name": "@zxing/library",
+  "name": "zxing-js-library",
   "version": "0.20.1",
   "description": "TypeScript port of ZXing multi-format 1D/2D barcode image processing library.",
   "keywords": [
